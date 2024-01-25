@@ -5,6 +5,7 @@ using Application.Queries.GetById;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Presentation.Abstractions;
 
 namespace Presentation;
 
@@ -13,7 +14,7 @@ public static class Extensions
     public static void RegisterServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddEndpointsApiExplorer();
-
+        
         #region Swagger
         builder.Services.AddSwaggerGen(options =>
         {
@@ -22,7 +23,7 @@ public static class Extensions
                 {
                     Version = "v1",
                     Title = $"Pastes API - {CultureInfo.CurrentCulture.TextInfo.ToTitleCase(builder.Environment.EnvironmentName)}",
-                    Description = "An example to share an implementation of Minimal API in .NET 6.",
+                    Description = "An example how to create PasteBin.",
                     License = new OpenApiLicense
                     {
                         Name = "PasteAPI - License - MIT",
@@ -41,5 +42,19 @@ public static class Extensions
         builder.Services.AddMediatR(x =>
             x.RegisterServicesFromAssemblies(typeof(GetByIdHandler).Assembly, typeof(GetById).Assembly));
     }
-    
+    public static void RegisterEndpointsDefinition(this WebApplication app)
+    {
+        var endpoints = typeof(Program).Assembly
+            .GetTypes()
+            .Where(t => t.IsAssignableTo(typeof(IEndpointsRegistration))
+                        && !t.IsAbstract && !t.IsInterface)
+            .Select(Activator.CreateInstance)
+            .Cast<IEndpointsRegistration>();
+
+        foreach (var variableEndpoint in endpoints)
+        {
+            variableEndpoint.Register(app);
+        }
+    }
+
 }
