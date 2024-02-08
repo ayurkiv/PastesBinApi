@@ -62,8 +62,7 @@ public class PastesEndpoints : IEndpointsRegistration
     private async Task<IResult> Delete(IMediator mediator, Guid id)
     {
         var paste = new DeletePaste(){ Id = id };
-        var statusDelete = await mediator.Send(paste);
-        if (statusDelete) return TypedResults.NoContent();
-        return TypedResults.NotFound("NotFoundId");
+        await mediator.Send(paste);
+        return TypedResults.NoContent();
     }
 }
