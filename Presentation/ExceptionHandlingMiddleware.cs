@@ -29,7 +29,7 @@ public class ExceptionHandlingMiddleware
             await HandleExceptionAsync(httpContext,
                 ex.Message,
                 HttpStatusCode.NotFound,
-                "NotFound");
+                ex.Message);
 
         }
         catch (Exception ex)
